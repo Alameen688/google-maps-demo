@@ -41,6 +41,7 @@ android {
         applicationId "com.general_mentos.maps_devfest"
         // TODO: Look into bringing multidex support for apps with minSdkVersion level below 21 https://developer.android.com/studio/build/multidex 
         // changed minSdkVersion version from 16 (Jelly Bean) to 21 (Lollipop) for multidex support needed by FlutterFire plugins (cloud_firestore)
+        // simply setting multiDexEnabled to true is not sufficient as lower API level apps become slo
         minSdkVersion 21
         targetSdkVersion 28
         versionCode flutterVersionCode.toInteger()
