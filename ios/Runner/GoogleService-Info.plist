@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>1049189411857-0vrk98f4b51t5kinau3mv733barvtjvg.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.1049189411857-0vrk98f4b51t5kinau3mv733barvtjvg</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>1049189411857-tvakr168b0senerh4q8eadmf1iauv67k.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyBeWPTHzuEOemzDus-VS3vSMR5JqqD5I-U</string>
+	<key>GCM_SENDER_ID</key>
+	<string>1049189411857</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.generalmentos.mapsDevfest</string>
+	<key>PROJECT_ID</key>
+	<string>maps-devfest19</string>
+	<key>STORAGE_BUCKET</key>
+	<string>maps-devfest19.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:1049189411857:ios:c1cf960372679b7a6c55b0</string>
+	<key>DATABASE_URL</key>
+	<string>https://maps-devfest19.firebaseio.com</string>
+</dict>
+</plist>
