@@ -1,5 +1,7 @@
-# Uncomment this line to define a global platform for your project
-# platform :ios, '9.0'
+# TODO: Possibly remove platform 9.0 upgrade to support Flutter's minimum version of 8.0 if Maps increases supports 
+# Bumping up minimum support up to iOS 9 because Google Maps SDK for iOS supports a minimum iOS version 9 
+# however Flutter supports a minimum version of 8.0
+platform :ios, '9.0'
 
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
