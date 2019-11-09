@@ -1,7 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:maps_devfest/services/google_maps_service.dart';
+import 'package:maps_devfest/ui/common/search_input.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -10,10 +13,13 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   // 2 ways to set controller
-  // I prefer the non setstate way
+  // I prefer the non setstate way (for no particular reason)
   Completer<GoogleMapController> _mapController = Completer();
   GoogleMapController _mapController2;
-  static final CameraPosition _initialPosition =
+  LatLng _startPosition;
+  LatLng _finalDestination;
+  
+  static final CameraPosition _initialCameraPosition =
       CameraPosition(target: LatLng(7.444132, 3.893878), zoom: 14.5);
 
   static final CameraPosition _newPosition = CameraPosition(
@@ -24,17 +30,33 @@ class _HomeState extends State<Home> {
       tilt: 59.440717697143555,
       zoom: 19.151926040649414);
 
+  TextEditingController pickupTextEditingController = TextEditingController();
+  TextEditingController destTextEditingController = TextEditingController();
+
+  // TODO: Use DI to provide lazy singleton instance of GeoLocator anywhere needed
+  Geolocator geoLocator = Geolocator();
+  GoogleMapsService _mapsService = GoogleMapsService();
+
+  final Set<Polyline> _polyLines = Set();
+
+  @override
+  void initState() {
+    super.initState();
+    _getCurrentLocation();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: <Widget>[
           GoogleMap(
-            initialCameraPosition: _initialPosition,
+            initialCameraPosition: _initialCameraPosition,
             myLocationEnabled: true,
             myLocationButtonEnabled: true,
             compassEnabled: true,
             onMapCreated: _onMapCreated2,
+            polylines: _polyLines,
           ),
           Positioned(
             top: 0,
@@ -45,9 +67,12 @@ class _HomeState extends State<Home> {
                 children: <Widget>[
                   SearchInput(
                     initialText: 'Pick up',
+                    textController: pickupTextEditingController,
                   ),
                   SearchInput(
                     initialText: 'Destination',
+                    textController: destTextEditingController,
+                    onSubmitted: getDirections,
                   )
                 ],
               ),
@@ -80,47 +105,97 @@ class _HomeState extends State<Home> {
     // controller.animateCamera(CameraUpdate.newCameraPosition(_newPosition));
     _mapController2.animateCamera(CameraUpdate.newCameraPosition(_newPosition));
   }
-}
 
-class SearchInput extends StatelessWidget {
-  final String initialText;
+  _getCurrentLocation() async {
+    Position currentPosition = await geoLocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
+    List<Placemark> placemark =
+        await geoLocator.placemarkFromPosition(currentPosition);
+    pickupTextEditingController.text = placemark[0].name;
+    debugPrint(placemark[0].toJson().toString());
+    debugPrint(placemark[0].name);
+    debugPrint(currentPosition.toJson().toString());
+    List<Placemark> finalPlacemark =
+        await geoLocator.placemarkFromCoordinates(7.444023, 3.868124);
+    destTextEditingController.text = finalPlacemark[0].name;
+    setState(() {
+      _startPosition =
+          LatLng(currentPosition.latitude, currentPosition.longitude);
+      _finalDestination = LatLng(7.444023, 3.868124);
+    });
+  }
 
-  const SearchInput({Key key, @required this.initialText}) : super(key: key);
+  getDirections(String destination) async {
+    List<Placemark> placemark =
+        await geoLocator.placemarkFromAddress(destination);
+    debugPrint("Called get directions");
+    final latitude = placemark[0].position.latitude;
+    final longitude = placemark[0].position.longitude;
+    LatLng destinationCoord = LatLng(latitude, longitude);
+    String route = await _mapsService.getRouteCoordinates(
+        _startPosition, destinationCoord);
+    createRoute(route, destinationCoord);
+  }
+
+  createRoute(String encondedPolyLines, destinationCoord) {
+    final polyline = Polyline(
+        polylineId: PolylineId(destinationCoord.toString()),
+        width: 10,
+        points: _convertToLatLng(_decodePoly(encondedPolyLines)),
+        color: Colors.black);
+    setState(() {
+      _polyLines.add(polyline);
+    });
+  }
+
+  List<LatLng> _convertToLatLng(List points) {
+    List<LatLng> result = <LatLng>[];
+    for (int i = 0; i < points.length; i++) {
+      if (i % 2 != 0) {
+        result.add(LatLng(points[i - 1], points[i]));
+      }
+    }
+    return result;
+  }
+
+  List _decodePoly(String poly) {
+    var list = poly.codeUnits;
+    var lList = new List();
+    int index = 0;
+    int len = poly.length;
+    int c = 0;
+// repeating until all attributes are decoded
+    do {
+      var shift = 0;
+      int result = 0;
+
+      // for decoding value of one attribute
+      do {
+        c = list[index] - 63;
+        result |= (c & 0x1F) << (shift * 5);
+        index++;
+        shift++;
+      } while (c >= 32);
+      /* if value is negetive then bitwise not the value */
+      if (result & 1 == 1) {
+        result = ~result;
+      }
+      var result1 = (result >> 1) * 0.00001;
+      lList.add(result1);
+    } while (index < len);
+
+/*adding to previous value as done in encoding */
+    for (var i = 2; i < lList.length; i++) lList[i] += lList[i - 2];
+
+    print(lList.toString());
+
+    return lList;
+  }
 
   @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: <Widget>[
-        Expanded(
-          child: Container(
-            height: 50,
-            margin: const EdgeInsets.fromLTRB(12, 8, 8, 0),
-            padding: EdgeInsets.symmetric(
-              horizontal: 15.0,
-            ),
-            alignment: Alignment.centerLeft,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(10.0),
-              boxShadow: <BoxShadow>[
-                BoxShadow(
-                  color: Color.fromRGBO(13, 51, 32, 0.1),
-                  offset: Offset(0.0, 6.0),
-                  blurRadius: 10.0,
-                ),
-              ],
-            ),
-            child: TextField(
-              cursorColor: Color(0xFF5B616F),
-              decoration: InputDecoration(
-                  border: InputBorder.none,
-                  focusedBorder: InputBorder.none,
-                  enabledBorder: InputBorder.none,
-                  hintText: initialText),
-            ),
-          ),
-        )
-      ],
-    );
+  void dispose() {
+    pickupTextEditingController.dispose();
+    destTextEditingController.dispose();
+    super.dispose();
   }
 }

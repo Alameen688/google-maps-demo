@@ -4,8 +4,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' show Client, Response;
 import 'dart:convert';
 
-// const apiKey = 'AIzaSyBhDflq5iJrXIcKpeq0IzLQPQpOboX91lY';
-const apiKey = 'AIzaSyBeWPTHzuEOemzDus-VS3vSMR5JqqD5I-U';
+const apiKey = 'YOUR_API_KEY';
 
 class GoogleMapsService {
   static const BASE_URL = 'https://maps.googleapis.com/maps/api';

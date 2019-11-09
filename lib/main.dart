@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:maps_devfest/ui/home.dart';
+import 'package:maps_devfest/ui/search.dart';
 
 void main() => runApp(MapsDevfest());
 
@@ -11,7 +12,7 @@ class MapsDevfest extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: Home(),
+      home: Search(),
     );
   }
 }
